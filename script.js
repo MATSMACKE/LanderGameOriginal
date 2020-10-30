@@ -6,7 +6,7 @@ var wind = 0;
 var density = 1;
 
 var targetOffset = 0;
-var playerHeight = 2000;
+var playerHeight = 2170;
 
 var playing = true;
 var landed = false;
@@ -18,6 +18,7 @@ var gameArea = {
         this.canvas.height = window.innerHeight;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        player.calculateCoeffs();
         this.interval = setInterval(updateGameArea, 20);
     },
     clear : function() {
@@ -41,8 +42,10 @@ var player = {
   angle : 0,
   angularVelocity : 0,
   
-  dragCoeffx : calculateDragCoeff("x", this.angle, this.width, this.height),
-  dragCoeffy : calculateDragCoeff("y", this.angle, this.width, this.height),
+  calculateCoeffs : function() {
+    this.dragCoeffx = calculateDragCoeff("x", this.angle, this.width, this.height);
+    this.dragCoeffy = calculateDragCoeff("y", this.angle, this.width, this.height);
+  },
 
   twr : 2.5,
 
@@ -55,10 +58,12 @@ var player = {
     this.velocityy = this.velocityy + gravity - calculateDrag(this.dragCoeffy, this.velocityy, density);
     this.positiony = this.positiony + this.velocityy;
     
-    console.log(this.positiony);
+    //console.log(Math.round(this.positiony));
 
     this.velocityx = this.velocityx + wind - calculateDrag(this.dragCoeffx, this.velocityx, density);
     this.positionx = this.positionx + this.velocityx;
+    
+    console.log(this.velocityy.toFixed(2));
   }
 };
 
@@ -136,12 +141,29 @@ function drawGround(offset, playerx, playery, height) {
   draw.fillRect(0, height - playery, window.innerWidth, 10);
 }
 
+function drawText() {
+  var draw = gameArea.context;
+  draw.font = "30px Comic Sans MS"
+  draw.fillStyle = "black";
+  draw.fillText(target.height - Math.round(player.positiony) - 130, 10, 50);
+  draw.fillText(Math.round(player.velocityy * 5), window.innerWidth - 60, 50);
+}
+
 function calculateDragCoeff(axis, angle, width, height) {
-  return 0;
+  if (axis == "y") {
+    var radians = angle * Math.PI / 180;
+    return 0.1*((height * Math.sin(radians)) + (width * Math.cos(radians)));
+  }
+
+  else if (axis == "x") {
+    var radians = angle * Math.PI / 180;
+    var coeff = 0.1*((width * Math.sin(radians)) + (height * Math.cos(radians)));
+    return coeff;
+  }
 }
 
 function calculateDrag(coeff, velocity, functionDensity) {
-  return 0;
+  return Math.abs(0.001 * coeff * density * velocity * velocity);
 }
 
 function calculateAngularDrag(angle, velocityx, velocityy) {
@@ -153,18 +175,18 @@ function startGame() {
 
 }
 
-
-
 function updateGameArea() {
   if (playing == true && landed == false) {
     window.gameArea.clear();
     player.update();
     drawPlayer(player.positionx, 30, player.width, player.height, player.angle);
     drawGround(target.positionx, player.positionx, player.positiony, target.height);
+    drawText();
     if ((target.height - player.positiony - 130) < 0) {
-      if (player.velocityy > 3) {
+      if (player.velocityy > 1.4) {
         console.log("ded");
         alert("ded");
+        player.positionx = 1870;
         playing = false;
       }
       else {
@@ -173,6 +195,7 @@ function updateGameArea() {
         alert("landed");
         return;
       }
+      clearInterval(gameArea.interval);
     }
   }
 }
