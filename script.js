@@ -3,10 +3,10 @@
 //Declare Variables
 var gravity = 0.1;
 var wind = 0;
-var density = 1;
+var density = 0;
 
 var targetOffset = 0;
-var playerHeight = 2170;
+var playerHeight = 5000;
 
 var playing = true;
 var landed = false;
@@ -47,9 +47,12 @@ var player = {
     this.dragCoeffy = calculateDragCoeff("y", this.angle, this.width, this.height);
   },
 
-  twr : 2.5,
+  twr : 2,
+  rollAuth : 1,
 
   update : function() {
+    this.calculateCoeffs();
+
     checkInput();
 
     this.angularVelocity = this.angularVelocity + calculateAngularDrag(this.angle, this.velocityx, this.velocityy);
@@ -107,7 +110,14 @@ document.addEventListener('keyup', function(event) {
 //Read Input and apply changes to vehicle dynamics
 function checkInput() {
   if (upPressed == true) {
-    player.velocityy += -1*(player.twr / 10);
+    player.velocityy += Math.cos(player.angle * Math.PI / 180)*(-1*(player.twr / 10));
+    player.velocityx += -1 *  Math.sin(player.angle * Math.PI / 180)*(-1*(player.twr / 10))
+  }
+  if (leftPressed == true) {
+    player.angularVelocity += -0.01*(player.rollAuth)
+  }
+  if (rightPressed == true) {
+    player.angularVelocity += 0.01*(player.rollAuth)
   }
 }
 
@@ -152,22 +162,23 @@ function drawText() {
 function calculateDragCoeff(axis, angle, width, height) {
   if (axis == "y") {
     var radians = angle * Math.PI / 180;
-    return 0.1*((height * Math.sin(radians)) + (width * Math.cos(radians)));
+    return 0.05*((height * Math.sin(radians)) + (width * Math.cos(radians)));
   }
 
   else if (axis == "x") {
     var radians = angle * Math.PI / 180;
-    var coeff = 0.1*((width * Math.sin(radians)) + (height * Math.cos(radians)));
+    var coeff = 0.05*((width * Math.sin(radians)) + (height * Math.cos(radians)));
     return coeff;
   }
 }
 
 function calculateDrag(coeff, velocity, functionDensity) {
-  return Math.abs(0.001 * coeff * density * velocity * velocity);
+  return Math.abs(0.002 * coeff * density * velocity * velocity);
 }
 
 function calculateAngularDrag(angle, velocityx, velocityy) {
-  return 0;
+  var angularDrag = -0.0001 * angle * velocityy * density;
+  return angularDrag;
 }
 
 function startGame() {
@@ -183,7 +194,7 @@ function updateGameArea() {
     drawGround(target.positionx, player.positionx, player.positiony, target.height);
     drawText();
     if ((target.height - player.positiony - 130) < 0) {
-      if (player.velocityy > 1.4) {
+      if ((player.velocityy > 1.4)||(Math.abs(player.velocityx) > 1)||(player.angle > 6)) {
         console.log("ded");
         alert("ded");
         player.positionx = 1870;
