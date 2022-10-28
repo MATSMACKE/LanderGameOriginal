@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Home</title>
+  </head>
+  <body>
+    <input type="number" min="0" id="altitude"><label for="altitude">Starting Altitude</label><br>
+    <input type="number" id="offset"><label for="offset">Target Offset</label><br>
+    <input type="number" min="0" id="density"><label for="density">Air density</label><br>
+    <input type="number" min="0" id="gravity"><label for="gravity">Gravity</label><br>
+    <input type="number" id="wind"><label for="wind">Wind</label><br>
+    <input type="number" min="0" id="power"><label for="power">Power</label><br>
+    <input type="number" min="0" id="rollauth"><label for="rollauth">Roll authority</label><br>
+    <p>CONTROLS: Up arrow, left arrow, right arrow</p>
+    <button id="submit" onclick="startGame();">Start Game</button>
+    <button onclick="window.location.href = '../index.html'">Slider input</button>
+
+    <script>
+      function startGame() {
+        window.location.href = "game.html?altitude=" + document.getElementById("altitude").value + "&offset=" +  document.getElementById("offset").value + "&density=" + document.getElementById("density").value + "&gravity=" + document.getElementById("gravity").value + "&wind=" + document.getElementById("wind").value + "&power=" + document.getElementById("power").value + "&rollauth=" + document.getElementById("rollauth").value
+      }
+    </script>
+  </body>
+</html>
